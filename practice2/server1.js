@@ -8,6 +8,11 @@ const { connectToDatabase, getClient } = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const bcrypt = require('bcrypt');
+const saltRounds = 10;
+const myPlaintextPassword = 'myPassword';
+bcrypt.hash(myPlaintextPassword, saltRounds, function(err, hash) {
+  // Store hash in your password DB.
+});
 
 // MongoDB connection string with 'p2ecommerce' database
 const mongoURI = 'mongodb://localhost:27017/p2ecommerce';
@@ -64,17 +69,17 @@ app.get('/admin', (req, res) => {
 });
 
 // API to get products
-app.get('/api/products', async (req, res) => {
-  const products = await db.collection('products').find().toArray();
+//app.get('/api/products', async (req, res) => {
+  //const products = await db.collection('products').find().toArray();
 
   // Prepend 'image/' to image filenames
-  const productsWithImagePath = products.map(product => ({
-    ...product,
-    image: `image/${product.image}`,
-  }));
+  //const productsWithImagePath = products.map(product => ({
+   // ...product,
+  //  image: `image/${product.image}`,
+  //}));
 
-  res.json(productsWithImagePath);
-});
+  //res.json(productsWithImagePath);
+//});
 
 // API to get product details by ID
 app.get('/api/products/:id', async (req, res) => {
@@ -153,12 +158,17 @@ app.get('/', (req, res) => {
 
 // Create a register page (GET request)
 app.get('/register', (req, res) => {
-  res.render('register'); // Assuming you have a 'register' view
+	res.sendFile('register.html', { root: 'public' });
 });
 
 app.get('/login', (req, res) => {
   // Handle the login page route
-  res.render('login');
+  res.sendFile('login.html', { root: 'public' });
+});
+
+app.get('/profile', (req, res) => {
+  // Your logic to fetch profile data, render a template, etc.
+  res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
 
 // Define the User schema
@@ -194,9 +204,6 @@ console.log('Password:', password);
     const collection = client.db().collection('user');
 
 console.log('Successfully accessed the users collection');
-          // Hash the provided password
-    const hashedPassword = await hashPassword(password);
-
 
     // Perform authentication logic against MongoDB
     const user = await collection.findOne({ username, password });
@@ -205,10 +212,10 @@ console.log('Successfully accessed the users collection');
 
 if (user) {
       // Redirect to home page with user profile
-      res.render('profile', { user }); // You can pass additional data in the URL or use sessions for more advanced scenarios
+      res.redirect('/profile.html'); // You can pass additional data in the URL or use sessions for more advanced scenarios
     } else {
       // If authentication fails, render the login page again with an error message
-      res.render('login', { error: 'Invalid username or password' });
+      res.redirect('/login.html')
     }
 
   } catch (error) {
@@ -229,7 +236,7 @@ app.post('/api/register', async (req, res) => {
   try {
     const { firstName, lastName, email, password, address, phoneNumber } = req.body;
 
-    const db = getClient().db('Black_lion_store');
+    const db = getClient().db('p2ecommerce');
     const usersCollection = db.collection('users');
 
     const existingUser = await usersCollection.findOne({ email });

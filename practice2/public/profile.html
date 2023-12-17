@@ -3,18 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product List</title>
-    <!-- Add Bootstrap CSS link -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- Add FontAwesome CSS link -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <title>Home Page with User Profile</title>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+        }
+
+        section {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        p {
+            color: #555;
+        }
+
+        hr {
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+
 </head>
 <body>
-    <div class="container">
-        <div class="title">PRODUCT LIST</div>
-        <div class="listProduct" id="productList"></div>
-    </div>
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+
+    <header>
+        <h1>Welcome to the Home Page, <%= user.firstName %> <%= user.lastName %>!</h1>
+    </header>
+
+    <section>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="/">Black Lion Store</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -57,7 +104,7 @@
                 <p class="lead">Explore our latest products and enjoy a seamless shopping experience.</p>
             </div>
             <div class="col-md-6">
-                <img src="1702403024656-618323393-img8.jpg" alt="Mobile" class="img-fluid">
+                <img src="image/mobile-image.jpg" alt="Mobile" class="img-fluid">
             </div>
         </div>
     </div>
@@ -101,8 +148,8 @@
             <p class="card-text">Learn more about our company and mission.</p>
             <a href="/about-us" class="btn btn-info">Read More</a>
         </div>
-    </div>
-    <!-- End of About Us Section -->
+
+         <!-- End of About Us Section -->
 
     <!-- Contact Us Section -->
     <div id="contact-us" class="card mb-4">
@@ -116,75 +163,25 @@
     </div>
     <!-- End of Contact Us Section -->
 
-    <!-- Links to Registration and Login Pages -->
-    <div id="register" class="row">
-        <div class="col-md-6">
-            <div class="card bg-light mb-3">
-                <div class="card-body">
-                    <h2 class="card-title"><i class="fas fa-user-plus"></i> Register</h2>
-                    <a href="/register" class="btn btn-success">Register Now</a>
-                </div>
-            </div>
-        </div>
-        <div id="login" class="col-md-6">
-            <div class="card bg-light mb-3">
-                <div class="card-body">
-                    <h2 class="card-title"><i class="fas fa-sign-in-alt"></i> Login</h2>
-                    <a href="/login" class="btn btn-primary">Login Now</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- End of Links Section -->
-</div>
+        <hr>
 
+        <!-- Display user profile information -->
+        <h2>User Profile</h2>
+        <p><strong>Email:</strong> <%= user.email %></p>
+        <p><strong>Address:</strong> <%= user.address %></p>
+        <p><strong>Phone Number:</strong> <%= user.phoneNumber %></p>
 
-<script>
-    // Enable smooth scrolling
-    $(document).ready(function(){
-        $('a[data-bs-target^="#"]').on('click', function (e) {
-            e.preventDefault();
+        <!-- Add more details or sections as needed -->
 
-            var target = this.hash;
-            var $target = $(target);
+    </section>
 
-            $('html, body').stop().animate({
-                'scrollTop': $target.offset().top
-            }, 900, 'swing', function () {
-                window.location.hash = target;
-            });
-        });
-    });
-</script>
+    <!-- Add any additional sections or content here -->
 
-<!-- Add Bootstrap JS and Popper.js scripts at the end -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        // Fetch products from the API
-        fetch('/api/products')
-            .then(response => response.json())
-            .then(products => {
-                addDataToHTML(products);
-            })
-            .catch(error => console.error('Error fetching products:', error));
+    <footer>
+        <p>&copy; 2023 Your Website</p>
+    </footer>
 
-        function addDataToHTML(products) {
-            const listProductHTML = document.getElementById('productList');
+    <!-- Add any additional scripts or script references here -->
 
-            // Add new products
-            products.forEach(product => {
-                let newProduct = document.createElement('a');
-                newProduct.href = `/detail.html?id=${product._id}`;
-                newProduct.classList.add('item');
-                newProduct.innerHTML = `
-                    <img src="${product.image}" alt="${product.name}">
-                    <h2>${product.name}</h2>
-                    <div class="price">$${product.price}</div>`;
-                listProductHTML.appendChild(newProduct);
-            });
-        }
-    </script>
 </body>
 </html>
