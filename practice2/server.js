@@ -2,7 +2,9 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const { MongoClient, ObjectId } = require('mongodb');
-
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const { connectToDatabase, getClient } = require('./db');
 const app = express();
 const port = 3000;
 
@@ -11,6 +13,14 @@ const mongoURI = 'mongodb://localhost:27017/p2ecommerce';
 // Database name
 const dbName = 'p2ecommerce';
 
+// Serve static files from the 'public' directory
+app.use(express.static('public'));
+
+// Middleware to parse JSON data in requests
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 let db;
 
 // Function to connect to MongoDB
@@ -128,6 +138,131 @@ app.delete('/api/products/:id', async (req, res) => {
     // Handle unexpected errors
     console.error('Error deleting product:', error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
+
+// Create a register page (GET request)
+app.get('/register', (req, res) => {
+  // Assuming you have an 'register.html' file in the 'public' directory
+  res.sendFile(path.join(__dirname, 'public', 'register.html'));
+});
+
+// Handle the login page route
+app.get('/login', (req, res) => {
+  // Assuming you have a 'login.html' file in the 'public' directory
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// Define the User schema
+const userSchema = new mongoose.Schema({
+  username: String,
+  password: String,
+});
+
+const User = mongoose.model('User', userSchema);
+
+// Your hashPassword function
+const hashPassword = async (password) => {
+  // Generate a salt and hash the password
+  const saltRounds = 10; // You can adjust this value based on your security requirements
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  return hashedPassword;
+};
+
+
+app.post('/api/login', async (req, res) => {
+  const username = req.body.username;
+        const password = req.body.password;
+
+        console.log('Username:', username);
+console.log('Password:', password);
+        let client;
+  try {
+          // Connect to MongoDB
+          const client = new MongoClient(process.env.MONGODB_URI);
+  // Connect to MongoDBawait client.connect();
+          await client.connect();
+
+    // Access the users collection
+    const collection = client.db().collection('user');
+
+console.log('Successfully accessed the users collection');
+          // Hash the provided password
+    const hashedPassword = await hashPassword(password);
+
+
+    // Perform authentication logic against MongoDB
+    const user = await collection.findOne({ username, password });
+
+          console.log('Found user:', JSON.stringify(user));
+
+if (user) {
+      // Redirect to home page with user profile
+      res.render('profile', { user }); // You can pass additional data in the URL or use sessions for more advanced scenarios
+    } else {
+      // If authentication fails, render the login page again with an error message
+      res.render('login', { error: 'Invalid username or password' });
+    }
+
+  } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
+            res.render('login', { error: 'Internal Server Error' });
+        res.status(500).send('Internal Server Error');
+  } finally {
+          if (client) {
+    // Close the MongoDB connection
+    await client.close();
+  }
+  }
+});
+
+// Handle registration form submission (POST request)
+app.post('/api/register', async (req, res) => {
+        console.log('Request body:', req.body);
+  try {
+    const { firstName, lastName, email, password, address, phoneNumber } = req.body;
+	  
+
+	  // Create a MongoClient instance
+    const client = new MongoClient(mongoURI);
+
+    // Connect to the MongoDB server
+    await client.connect();
+
+    // Access the 'p2ecommerce' database
+    const db = getClient().db('p2ecommerce');
+
+    // Access the 'users' collection	  
+    const usersCollection = db.collection('users');
+
+    // Check if the email is already registered	  
+    const existingUser = await usersCollection.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email already registered!' });
+    }
+	 
+
+    // Create a new user object	  
+    const newUser = {
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      address,
+      phoneNumber,
+    };
+
+    // Insert the new user into the 'users' collection
+    await usersCollection.insertOne(newUser);
+
+    // Close the MongoDB connection
+    client.close();
+
+    res.status(200).send('Registration successful!');
+  } catch (error) {
+    console.error('Error registering user:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
