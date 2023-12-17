@@ -69,17 +69,17 @@ app.get('/admin', (req, res) => {
 });
 
 // API to get products
-app.get('/api/products', async (req, res) => {
+//app.get('/api/products', async (req, res) => {
   //const products = await db.collection('products').find().toArray();
 
   // Prepend 'image/' to image filenames
-  const productsWithImagePath = products.map(product => ({
-    ...product,
-    image: `image/${product.image}`,
-  }));
+  //const productsWithImagePath = products.map(product => ({
+    //...product,
+    //image: `image/${product.image}`,
+  //}));
 
-  res.json(productsWithImagePath);
-});
+  //res.json(productsWithImagePath);
+//});
 
 // API to get product details by ID
 app.get('/api/products/:id', async (req, res) => {
